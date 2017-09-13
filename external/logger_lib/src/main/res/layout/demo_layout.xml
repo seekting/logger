@@ -1,33 +1,27 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:tools="http://schemas.android.com/tools"
-             android:layout_width="match_parent"
-             android:layout_height="wrap_content" >
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="vertical">
 
-    <ImageView
-        android:id="@+id/thumb"
+
+    <Button
+        android:id="@+id/clear"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="right" />
+        android:text="clear"/>
 
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="match_parent"
-        android:layout_height="20dip"
-        android:textSize="16dp" />
 
-    <TextView
-        android:id="@+id/class_name"
-        android:layout_width="match_parent"
+    <Button
+        android:id="@+id/begin"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dip"
-        android:textSize="16dp" />
+        android:text="begin"/>
 
-    <TextView
-        android:id="@+id/description"
-        android:layout_width="match_parent"
+    <Button
+        android:id="@+id/check"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginRight="100dp"
-        android:layout_marginTop="40dip"
-        android:textSize="10dp" />
+        android:text="check"/>
 
-</FrameLayout>
+</LinearLayout>

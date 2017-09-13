@@ -59,9 +59,9 @@ public class RandomAccessWriter<T> extends BaseLogWriter<T> {
         try {
             randomAccessFile = new RandomAccessFile(file, "rw");
             fileChannel = randomAccessFile.getChannel();
-            long size = fileChannel.size();
 //            System.out.println("size=" + size);
-            lock = fileChannel.lock(0, Integer.MAX_VALUE, true);
+            lock = fileChannel.lock();
+            long size = fileChannel.size();
             fileChannel.position(size);
 //            System.out.println("v" + lock.isValid());
             ByteBuffer sendBuffer = ByteBuffer.wrap(bytes);
@@ -78,6 +78,7 @@ public class RandomAccessWriter<T> extends BaseLogWriter<T> {
                     lock.release();
                 } catch (IOException e) {
 //                    e.printStackTrace();
+                    mLoggerEvent.onException(file, e);
                 }
             }
             if (fileChannel != null) {
@@ -85,6 +86,7 @@ public class RandomAccessWriter<T> extends BaseLogWriter<T> {
                     fileChannel.close();
                 } catch (IOException e) {
 //                    e.printStackTrace();
+                    mLoggerEvent.onException(file, e);
                 }
             }
             if (randomAccessFile != null) {
@@ -92,6 +94,7 @@ public class RandomAccessWriter<T> extends BaseLogWriter<T> {
                     randomAccessFile.close();
                 } catch (IOException e) {
 //                e.printStackTrace();
+                    mLoggerEvent.onException(file, e);
                 }
             }
         }

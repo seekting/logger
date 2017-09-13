@@ -38,8 +38,23 @@ public class LoggerOutputUtil {
         }
     }
 
+    public static void clear(File dir) {
+        if (dir.isDirectory()) {
+            File[] l = dir.listFiles();
+            for (File file : l) {
+                if (!file.isDirectory()) {
+                    file.delete();
+                    S_loggerEvent.onClear("delete:" + file.getAbsolutePath());
+                }
+            }
 
-    public static void recordLogcat() {
+        } else {
+            dir.delete();
+            S_loggerEvent.onClear("delete:" + dir.getAbsolutePath());
+        }
+    }
+
+    public static void recordLogcat(String fileTag) {
         String date = SIMPLE_DATE_FORMAT.format(new Date());
         File file = new File(s_dir);
         if (!file.exists()) {
@@ -55,7 +70,7 @@ public class LoggerOutputUtil {
         cmdLine.add("-v");
         cmdLine.add("threadtime");
         cmdLine.add("-f");
-        String realFileName = "Logcat_" + date + ".txt";
+        String realFileName = "Logcat_" + fileTag + "_" + date + ".txt";
         cmdLine.add(realFileName);
         if (S_loggerEvent != null) {
             S_loggerEvent.onRecordLogcat("FileName=" + file + realFileName);
@@ -138,7 +153,7 @@ public class LoggerOutputUtil {
                 .mMsg(msg)
                 .mThrowable(t)
                 .mPid(S_Pid)
-                .mTid(S_loggerEvent.getTid())
+                .mTid(android.os.Process.myTid())
                 .mProcessName(S_processName);
         LoggerMessage loggerMessage = builder.build();
         try {

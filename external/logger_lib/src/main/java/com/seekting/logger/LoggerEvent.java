@@ -15,8 +15,10 @@ public interface LoggerEvent {
     void onPostWrite(File f, String tag, String msg);
 
     void onException(File f, Throwable t);
-    int getTid();
+
     void onWriteText(File file, String text);
 
     void onRecordLogcat(String realFileName);
+
+    void onClear(String s);
 }

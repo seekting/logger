@@ -17,6 +17,7 @@ import static com.android.internal.app.IntentForwarderActivity.TAG;
  */
 
 public class App extends Application {
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -26,11 +27,12 @@ public class App extends Application {
 
         int pid = android.os.Process.myPid();
         String processName = getCurrentProcessName();
-        Log.d("seekting", "App.onCreate()processName=" + processName);
+
         LoggerEvent loggerEvent = new LoggerEvent() {
             @Override
             public void onPreWrite(File f, String tag, String msg) {
                 Log.d("seekting", "App.onPreWrite()" + f + msg);
+
 
             }
 
@@ -47,12 +49,10 @@ public class App extends Application {
             @Override
             public void onException(File f, Throwable t) {
 
+                Log.d("seekting", "App.onException()", t);
+
             }
 
-            @Override
-            public int getTid() {
-                return 0;
-            }
 
             @Override
             public void onWriteText(File file, String text) {
@@ -62,6 +62,11 @@ public class App extends Application {
             @Override
             public void onRecordLogcat(String realFileName) {
 
+            }
+
+            @Override
+            public void onClear(String s) {
+                Log.d("seekting", "App.onClear()" + s);
             }
         };
         LoggerOutputUtil.init(myDir.getAbsolutePath(), pid + "", processName, loggerEvent);
