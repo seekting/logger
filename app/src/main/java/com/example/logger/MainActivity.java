@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.seekting.logger.LoggerOutputUtil;
+import com.seekting.logger.TimingLoggers;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -28,6 +29,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        TimingLoggers.begin("seekting", "onCreate");
+        TimingLoggers.addSplit("onCreate", "1");
+        SystemClock.sleep(120);
+        TimingLoggers.addSplit("onCreate", "2");
+        SystemClock.sleep(14);
+        TimingLoggers.addSplit("onCreate", "3");
+        SystemClock.sleep(12);
+        TimingLoggers.addSplit("onCreate", "4");
+        SystemClock.sleep(11);
+        TimingLoggers.dumpToLog("onCreate");
 
         LoggerOutputUtil.recordLogcat("test");
         setContentView(R.layout.demo_layout);

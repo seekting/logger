@@ -1,4 +1,4 @@
-#Wellcome to LoggerLib
+# Wellcome to LoggerLib
 
 ## gradle dependencies
 
@@ -88,4 +88,37 @@ LoggerOutputUtil.recordLogcat("test");
 
 you can save log in customer dir by LoggerOutputUtil.init method,but only invoke once in process lifecycle
 
-and log file will save in customer dir.you can cmd:adb pull customer ... get your log files.
+and log file will save in customer dir.you can cmd:
+```java
+adb pull customer dir
+```
+ get your log files.
+
+
+ ## TimingLoggers
+
+You can analyze the wast time each operate, by TimingLoggers
+ ```java
+         TimingLoggers.begin("seekting", "onCreate");
+         TimingLoggers.addSplit("onCreate", "1");
+         SystemClock.sleep(120);
+         TimingLoggers.addSplit("onCreate", "2");
+         SystemClock.sleep(14);
+         TimingLoggers.addSplit("onCreate", "3");
+         SystemClock.sleep(12);
+         TimingLoggers.addSplit("onCreate", "4");
+         SystemClock.sleep(11);
+         TimingLoggers.dumpToLog("onCreate");
+
+ ```
+
+
+ ```
+09-14 21:13:47.747 9614-9614/com.example.logger:ui D/seekting: onCreate: begin
+09-14 21:13:47.747 9614-9614/com.example.logger:ui D/seekting: onCreate:      0 ms, 1
+09-14 21:13:47.747 9614-9614/com.example.logger:ui D/seekting: onCreate:      120 ms, 2
+09-14 21:13:47.747 9614-9614/com.example.logger:ui D/seekting: onCreate:      15 ms, 3
+09-14 21:13:47.747 9614-9614/com.example.logger:ui D/seekting: onCreate:      12 ms, 4
+09-14 21:13:47.747 9614-9614/com.example.logger:ui D/seekting: onCreate: end, 147 ms
+
+ ```
