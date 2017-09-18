@@ -1,4 +1,4 @@
-package com.seekting.logger;
+package com.seekting.logger.bean;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -12,20 +12,20 @@ import java.util.Map;
  * Created by Administrator on 2017/8/31.
  */
 
-class LoggerMessage {
-    static final String pattern = "MM-dd HH:mm:ss.SSS";
-    static final Date date = new Date();
-    static final SimpleDateFormat simpleFormatter = new SimpleDateFormat(pattern);
+public class LoggerMessage implements LogcatAble {
+    private static final String pattern = "MM-dd HH:mm:ss.SSS";
+    private static final Date date = new Date();
+    private static final SimpleDateFormat simpleFormatter = new SimpleDateFormat(pattern);
 
 
-    int mTid;
-    int mLogType;
-    long mTime;
-    String mTag;
-    Object mMsg;
-    Throwable mThrowable;
-    String mPid;
-    String mProcessName;
+    private final int mTid;
+    private final int mLogType;
+    private final long mTime;
+    private final String mTag;
+    private final Object mMsg;
+    private final Throwable mThrowable;
+    private final String mPid;
+    private final String mProcessName;
 
     private LoggerMessage(Builder builder) {
         mTid = builder.mTid;
@@ -38,6 +38,20 @@ class LoggerMessage {
         mProcessName = builder.mProcessName;
     }
 
+    @Override
+    public String getTag() {
+        return mTag;
+    }
+
+    @Override
+    public Object getMsg() {
+        return mMsg;
+    }
+
+    @Override
+    public String getLine() {
+        return toString();
+    }
 
     @Override
     public String toString() {
@@ -67,7 +81,6 @@ class LoggerMessage {
 
 
     }
-
 
 
     public static String getStackTraceString(Throwable tr) {
@@ -133,6 +146,7 @@ class LoggerMessage {
         LOG_TYPE_NAMES.put(ASSERT, "A");
 
     }
+
 
     public static final class Builder {
         private int mTid;

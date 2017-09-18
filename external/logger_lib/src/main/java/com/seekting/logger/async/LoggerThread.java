@@ -1,17 +1,24 @@
-package com.seekting.logger;
+package com.seekting.logger.async;
 
 import android.text.TextUtils;
 
+import com.seekting.logger.LoggerEnv;
+import com.seekting.logger.bean.LogcatAble;
+import com.seekting.logger.callback.LoggerEvent;
+import com.seekting.logger.io.LogWriterWrapper;
+
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import static com.seekting.logger.LoggerEnv.SIMPLE_DATE_FORMAT;
+
 
 /**
  * Created by Administrator on 2017/8/31.
  */
 
-public class LoggerThread<T> extends Thread {
+public class LoggerThread<T extends LogcatAble> extends Thread {
     public static final String EXTENSION_NAME = ".txt";
     public static final String TOO_OLD_REASON = "this file is too old ,create a new file";
     public static final String TOO_LARGE_REASON = "this file is too large ,create a new file";
@@ -19,22 +26,35 @@ public class LoggerThread<T> extends Thread {
     public static final String NEW_FILE = "#can't find any file,new a log file\n";
     private static String S_NEW_FILE = "# newFile=%s,reason:%s\n";
     private static String S_OLD_FILE = "# oldFile=%s,reason:%s\n";
+
+
+    public static final Date DATE = new Date();
+
+
     private LinkedBlockingQueue<T> mLinkedBlockingQueue;
     private String dir;
-    //every log max file length 10M
-    public static final int MAX_SIZE = 10 * 1024 * 1024;/*byte*/
-    //    public static final int MAX_SIZE = 8 * 10 * 10;/*byte*/
-    //every log record recently 30minutes event
-    public static final long MAX_TIME = 30 * 60 * 1000;
-    public static final String pattern = "yyyy-MM-dd-HH_mm_ss_SSS";
-    public static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat(pattern);
-    public static final Date DATE = new Date();
-    private ILogWriter<T> mTILogWriter;
+    private LogWriterWrapper mLogWriter;
+    private LoggerEvent mLoggerEvent;
+    private int mMaxSize;
+    private long mMaxTime;
 
-    public LoggerThread(String dir, LinkedBlockingQueue<T> linkedBlockingQueue, ILogWriter<T> iLogWriter) {
-        this.dir = dir;
-        mLinkedBlockingQueue = linkedBlockingQueue;
-        mTILogWriter = iLogWriter;
+
+
+    private LoggerThread(Builder builder) {
+        dir = builder.dir;
+        mLogWriter = builder.mLogWriter;
+        mLoggerEvent = builder.mLoggerEvent;
+        mMaxSize = builder.mMaxSize;
+        mMaxTime = builder.mMaxTime;
+        mLinkedBlockingQueue = new LinkedBlockingQueue<>();
+    }
+
+    public void put(T t) {
+        try {
+            mLinkedBlockingQueue.put(t);
+        } catch (InterruptedException e) {
+            mLoggerEvent.dividerException(e);
+        }
     }
 
     @Override
@@ -44,9 +64,7 @@ public class LoggerThread<T> extends Thread {
             try {
                 t = mLinkedBlockingQueue.take();
             } catch (InterruptedException e) {
-                if (LoggerOutputUtil.S_loggerEvent != null) {
-                    LoggerOutputUtil.S_loggerEvent.onException(null, e);
-                }
+                mLoggerEvent.dividerException(e);
             }
 
             if (t == null) {
@@ -59,12 +77,12 @@ public class LoggerThread<T> extends Thread {
                     onChangeNewFile(obtainFile.oldFile, obtainFile.targetFile, obtainFile.reason);
                 } else {
                     if (obtainFile.reason != null) {
-                        mTILogWriter.writeText(obtainFile.targetFile, obtainFile.reason);
+                        mLogWriter.writeText(obtainFile.targetFile, obtainFile.reason);
                     }
                 }
-                mTILogWriter.preWrite(obtainFile.targetFile, t);
-                mTILogWriter.doWrite(obtainFile.targetFile, t);
-                mTILogWriter.onPostWrite(obtainFile.targetFile, t);
+                mLogWriter.preWrite(obtainFile.targetFile, t.getTag(), t.getMsg());
+                mLogWriter.doWrite(obtainFile.targetFile, t.getTag(), t.getMsg(), t.getLine());
+                mLogWriter.onPostWrite(obtainFile.targetFile, t.getTag(), t.getMsg());
             }
 
 
@@ -75,8 +93,8 @@ public class LoggerThread<T> extends Thread {
 
 
     private void onChangeNewFile(File oldFile, File newFile, String reason) {
-        mTILogWriter.writeText(oldFile, String.format(S_NEW_FILE, newFile.getName(), reason));
-        mTILogWriter.writeText(newFile, String.format(S_OLD_FILE, oldFile.getName(), reason));
+        mLogWriter.writeText(oldFile, String.format(S_NEW_FILE, newFile.getName(), reason));
+        mLogWriter.writeText(newFile, String.format(S_OLD_FILE, oldFile.getName(), reason));
     }
 
     private ObtainFile obtainFile() {
@@ -93,11 +111,11 @@ public class LoggerThread<T> extends Thread {
             //find recently file by name;
             for (int i = 0; i < fileNames.length; i++) {
                 String fileName = fileNames[i];
-                if (TextUtils.isEmpty(fileName) || fileName.length() < pattern.length()) {
+                if (TextUtils.isEmpty(fileName) || fileName.length() < LoggerEnv.pattern.length()) {
                     continue;
                 }
                 try {
-                    Date date = SIMPLE_DATE_FORMAT.parse(fileName.substring(0, pattern.length()));
+                    Date date = SIMPLE_DATE_FORMAT.parse(fileName.substring(0, LoggerEnv.pattern.length()));
                     long dateTime = date.getTime();
                     //if find a file's timestamp>current,ignore this file
                     if (dateTime > current) {
@@ -115,7 +133,7 @@ public class LoggerThread<T> extends Thread {
             }
             if (hitFileName != null) {
                 long delta = current - maxTime;
-                if (delta > MAX_TIME) {
+                if (delta > mMaxTime) {
                     //this file is too old ,create a new file"
                     obtainFile.targetFile = createNewFile(dir);
                     obtainFile.oldFile = new File(dir, hitFileName);
@@ -124,7 +142,7 @@ public class LoggerThread<T> extends Thread {
                     File f = new File(dir, hitFileName);
                     long length = f.length();
                     // this file is too large ,create a new file
-                    if (length > MAX_SIZE) {
+                    if (length > mMaxSize) {
                         obtainFile.targetFile = createNewFile(dir);
                         obtainFile.oldFile = new File(dir, hitFileName);
                         obtainFile.reason = TOO_LARGE_REASON;
@@ -164,4 +182,43 @@ public class LoggerThread<T> extends Thread {
     }
 
 
+    public static final class Builder {
+        private String dir;
+        private LogWriterWrapper mLogWriter;
+        private LoggerEvent mLoggerEvent;
+        private int mMaxSize;
+        private long mMaxTime;
+
+        public Builder() {
+        }
+
+        public Builder dir(String val) {
+            dir = val;
+            return this;
+        }
+
+        public Builder logWriter(LogWriterWrapper val) {
+            mLogWriter = val;
+            return this;
+        }
+
+        public Builder loggerEvent(LoggerEvent val) {
+            mLoggerEvent = val;
+            return this;
+        }
+
+        public Builder maxSize(int val) {
+            mMaxSize = val;
+            return this;
+        }
+
+        public Builder maxTime(long val) {
+            mMaxTime = val;
+            return this;
+        }
+
+        public LoggerThread build() {
+            return new LoggerThread(this);
+        }
+    }
 }

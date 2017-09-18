@@ -23,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = "MainActivity";
     public static final int INT_TIME = 10;
-    public static final int INT_TIMES = 1000;
+    public static final int INT_TIMES = 10;
     public static String sss = "protected void onCreate(Bundle savedInstanceState),protected void onCreate(Bundle savedInstanceState),protected void onCreate(Bundle savedInstanceState),protected void onCreate(Bundle savedInstanceState),protected void onCreate(Bundle savedInstanceState)";
 
     @Override
@@ -40,14 +40,12 @@ public class MainActivity extends AppCompatActivity {
         SystemClock.sleep(11);
         TimingLoggers.dumpToLog("onCreate");
 
-        LoggerOutputUtil.recordLogcat("test");
+        LoggerOutputUtil.dumpLogcat("test");
         setContentView(R.layout.demo_layout);
         findViewById(R.id.clear).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                File dir = Environment.getExternalStorageDirectory();
-                File myDir = new File(dir, "logger_demo");
-                LoggerOutputUtil.clear(myDir);
+                App.clear();
             }
         });
         findViewById(R.id.begin).setOnClickListener(new View.OnClickListener() {
