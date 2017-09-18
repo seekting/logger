@@ -3,7 +3,7 @@
 ## gradle dependencies
 
 ```gradle
-compile 'com.seekting:loggerlib:1.0.1'
+compile 'com.seekting:loggerlib:1.0.3'
 
 ```
 
