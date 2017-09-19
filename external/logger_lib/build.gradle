@@ -38,4 +38,12 @@ publish {
     desc = 'loggerlib'//描述，不重要
     website = 'https://github.com/seekting'//网站，不重要；尽量模拟github上的地址，例如我这样的；当然你有地址最好了
 }
+task androidSourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.sourceFiles
+}
+artifacts {
+    archives androidSourcesJar
+}
+
 
