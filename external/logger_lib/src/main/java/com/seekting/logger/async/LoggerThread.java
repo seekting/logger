@@ -2,6 +2,7 @@ package com.seekting.logger.async;
 
 import android.text.TextUtils;
 
+import com.seekting.logger.DateUtil;
 import com.seekting.logger.LoggerEnv;
 import com.seekting.logger.bean.LogcatAble;
 import com.seekting.logger.callback.LoggerEvent;
@@ -10,8 +11,6 @@ import com.seekting.logger.io.LogWriterWrapper;
 import java.io.File;
 import java.util.Date;
 import java.util.concurrent.LinkedBlockingQueue;
-
-import static com.seekting.logger.LoggerEnv.SIMPLE_DATE_FORMAT;
 
 
 /**
@@ -28,16 +27,12 @@ public class LoggerThread<T extends LogcatAble> extends Thread {
     private static String S_OLD_FILE = "# oldFile=%s,reason:%s\n";
 
 
-    public static final Date DATE = new Date();
-
-
     private LinkedBlockingQueue<T> mLinkedBlockingQueue;
     private String dir;
     private LogWriterWrapper mLogWriter;
     private LoggerEvent mLoggerEvent;
     private int mMaxSize;
     private long mMaxTime;
-
 
 
     private LoggerThread(Builder builder) {
@@ -47,6 +42,8 @@ public class LoggerThread<T extends LogcatAble> extends Thread {
         mMaxSize = builder.mMaxSize;
         mMaxTime = builder.mMaxTime;
         mLinkedBlockingQueue = new LinkedBlockingQueue<>();
+        setPriority(Thread.MIN_PRIORITY);
+        setDaemon(true);
     }
 
     public void put(T t) {
@@ -115,7 +112,7 @@ public class LoggerThread<T extends LogcatAble> extends Thread {
                     continue;
                 }
                 try {
-                    Date date = SIMPLE_DATE_FORMAT.parse(fileName.substring(0, LoggerEnv.pattern.length()));
+                    Date date = DateUtil.parse(fileName.substring(0, LoggerEnv.pattern.length()));
                     long dateTime = date.getTime();
                     //if find a file's timestamp>current,ignore this file
                     if (dateTime > current) {
@@ -167,8 +164,7 @@ public class LoggerThread<T extends LogcatAble> extends Thread {
     }
 
     private File createNewFile(String dir) {
-        DATE.setTime(System.currentTimeMillis());
-        String fileName = SIMPLE_DATE_FORMAT.format(DATE) + EXTENSION_NAME;
+        String fileName = DateUtil.format(System.currentTimeMillis()) + EXTENSION_NAME;
         File result = new File(dir, fileName);
         return result;
 

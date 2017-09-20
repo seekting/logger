@@ -78,7 +78,7 @@ public class App extends Application {
         config.dir(myDir.getAbsolutePath())
                 .pid(pid + "")
                 .processName(processName)
-//                .loggerEvent(loggerEvent)
+                .loggerEvent(loggerEvent)
                 .fileMaxByteSize(4 * 1024 * 1024)
                 .fileOverDueTimeMillis(5 * 60 * 1000);
 //                .logWriter(new LogWriter() {

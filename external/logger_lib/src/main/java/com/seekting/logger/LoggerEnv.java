@@ -1,6 +1,5 @@
 package com.seekting.logger;
 
-import java.text.SimpleDateFormat;
 
 /**
  * Created by Administrator on 2017/9/18.
@@ -9,7 +8,6 @@ import java.text.SimpleDateFormat;
 public class LoggerEnv {
 
     public static final String pattern = "yyyy-MM-dd-HH_mm_ss_SSS";
-    public static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat(pattern);
     public static final String DEFAULT_PID = "0";
     public static final String DEFAULT_PROCESS_NAME = "loggerOutput";
     public static final String LOGGER_OUTPUT_PATH = "/loggerOutput/";

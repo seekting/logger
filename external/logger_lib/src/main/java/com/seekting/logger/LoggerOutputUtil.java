@@ -15,7 +15,6 @@ import com.seekting.logger.io.RandomAccessWriter;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -114,7 +113,7 @@ public class LoggerOutputUtil {
     }
 
     public static void dumpLogcat(String reason) {
-        String date = LoggerEnv.SIMPLE_DATE_FORMAT.format(new Date());
+        String date = DateUtil.format();
         File file = new File(mDir);
         if (!file.exists()) {
             boolean suc = file.mkdirs();
